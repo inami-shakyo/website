@@ -1,0 +1,7 @@
+このフォルダの書体は、Google Fonts から取得して、このホームページで配信しています。
+
+- BIZ UDPGothic（BIZ UDPゴシック）  https://fonts.google.com/specimen/BIZ+UDPGothic
+- Kiwi Maru（キウイ丸）            https://fonts.google.com/specimen/Kiwi+Maru
+
+どちらも SIL Open Font License 1.1 で公開されています。
+https://openfontlicense.org/open-font-license-official-text/
