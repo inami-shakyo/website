@@ -285,6 +285,14 @@ def open_in_new_tab(h):
     return re.sub(r"<a\s[^>]*>", f, h)
 
 
+def fix_file_labels(h):
+    """ファイルのリンクの後ろの「PDF・66KB」を、実際の種類に合わせる（旧サイトから移した本文では、Excel・Wordにも「PDF」と書いてある）。"""
+    def f(m):
+        return m.group(1) + ("Excel" if m.group(2).lower().startswith("xls") else "Word") + m.group(3)
+    return re.sub(r'(<a\s[^>]*href=["\'][^"\']*\.(xlsx?|docx?)(?:[?#][^"\']*)?["\'][^>]*>(?:(?!</a>).)*</a>(?:\s|&nbsp;)*)PDF(・)',
+                  f, h, flags=re.I | re.S)
+
+
 def clean_body(h, site, offline):
     """職員が入れた本文を、ホームページに載せられる形に整える。"""
     h = sanitize(h)
@@ -297,6 +305,7 @@ def clean_body(h, site, offline):
                lambda m: m.group(1) + localize_image(m.group(2), site, offline) + m.group(3), h)
     h = re.sub(r"<img(?![^>]*loading=)", '<img loading="lazy"', h)
     h = open_in_new_tab(h)
+    h = fix_file_labels(h)
     # PDF・Excel へのリンクに印を付ける（見た目で「ファイルが開く」とわかるように）
     h = re.sub(r'<a (?![^>]*class=)([^>]*href=["\'][^"\']*\.(pdf|xlsx?|docx?)["\'])', r'<a class="file" \1', h, flags=re.I)
     h = re.sub(r'<a (?![^>]*class=)([^>]*href=["\']files/)', r'<a class="file" \1', h)
