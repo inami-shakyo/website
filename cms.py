@@ -33,7 +33,7 @@ ORDERS = {"news": "-date", "pages": "order", "home": "order", "menu": "order", "
 JST = datetime.timezone(datetime.timedelta(hours=9))
 UA = "inami-shakyo-site-build"
 SLUG = re.compile(r"^[a-z0-9_-]{2,40}$")
-RESERVED = re.compile(r"^(index|404|page1|topics_index|topics_\d+|news_.*)$")
+RESERVED = re.compile(r"^(index|404|page1|search|topics_index|topics_\d+|news_.*)$")   # このサイトが自分で作るページの名前（search は 2026-11-14 に追加）
 OLD_PAGE = re.compile(r"[A-Za-z0-9_-]{1,40}")   # お知らせの旧ページ名・IDに使える字（ファイル名になるため）
 MAX_DOWNLOAD = 100 * 1024 * 1024                # 1ファイルあたりの上限（100MB）
 
