@@ -49,7 +49,11 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' 
 
 
 def csp_meta():
-    extra = "; upgrade-insecure-requests" if RELEASE else ""  # 手元の確認（http）では付けない
+    # 2026-11-14：DNS切替（11/24）の直後、証明書が出るまでは http でしか開けず、これがあると見た目が崩れる。
+    # GitHub の Enforce HTTPS を入れたら、下の行を
+    #   extra = "; upgrade-insecure-requests" if RELEASE else ""  # 手元の確認（http）では付けない
+    # に戻す（公開前チェック表 4章）。
+    extra = ""
     return f'<meta http-equiv="Content-Security-Policy" content="{CSP}{extra}">\n'
 
 
