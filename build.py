@@ -529,6 +529,13 @@ def home():
  {art}
 </section>""")
 
+    # Instagramの案内帯（トップ画面の「目的からさがす」の上）。外部のプログラムは読み込まず、リンクだけ置く
+    out.append("""<section class="insta" aria-labelledby="insta-h"><div class="wrap"><a class="insta-band" href="https://www.instagram.com/inami_shakyo/" target="_blank" rel="noopener">
+ <svg class="insta-ico" viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor"/></svg>
+ <span class="insta-text"><span id="insta-h" class="insta-title">社協の毎日を、Instagramでお届けしています</span><span class="insta-sub">活動の様子を写真でご覧いただけます（@inami_shakyo）</span></span>
+ <span class="insta-btn">Instagramを見る<span class="visually-hidden">（新しいタブで開きます）</span></span>
+</a></div></section>""")
+
     if parts["目的カード"]:
         cards = []
         for b in parts["目的カード"]:
