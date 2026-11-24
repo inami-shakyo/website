@@ -409,9 +409,62 @@ def with_form(body, heads):
     return body.rstrip() + "\n" + block, heads
 
 
+def era_ja(iso):
+    """YYYY-MM-DD → 令和8年11月1日 のような和暦の日付（平成・令和）。"""
+    y, m, d = (int(x) for x in iso.split("-"))
+    if (y, m, d) >= (2019, 5, 1):
+        return f"令和{'元' if y == 2019 else y - 2018}年{m}月{d}日"
+    return f"平成{'元' if y == 1989 else y - 1988}年{m}月{d}日"
+
+
+def era_year_fy(fy):
+    return f"令和{'元' if fy == 2019 else fy - 2018}年度" if fy >= 2019 else f"平成{fy - 1988}年度"
+
+
+def issue_block(body, heads):
+    """お知らせのうち「社協だより号数」「社協だより発行日」が入っているものを、過去号の一覧の先頭に新しい順で足す。
+    年度（4月始まり）の見出しも自動で付ける。本文にすでに第○号がある号は足さない（二重を防ぐ）。"""
+    items = [n for n in D["news"] if n.get("issue_no") and n.get("issue_date")
+             and not re.search(rf"第\s*{n['issue_no']}\s*号", body)]
+    if not items:
+        return body, heads
+    items.sort(key=lambda n: (n["issue_date"], n["issue_no"]), reverse=True)
+    groups = []   # [(年度, 見出しの文, [行, ...])] 新しい年度から
+    for n in items:
+        y, m = int(n["issue_date"][:4]), int(n["issue_date"][5:7])
+        fy = y if m >= 4 else y - 1
+        if not groups or groups[-1][0] != fy:
+            groups.append((fy, f"{era_year_fy(fy)}　社協だより　（ダウンロード）", []))
+        size = f' {esc(n["note"])}' if n.get("note") else ""
+        groups[-1][2].append(f'<p><a class="file"{link_attrs(n["href"])} href="{esc(n["href"])}">'
+                             f'第{n["issue_no"]}号（{era_ja(n["issue_date"])}発行）</a>{size}</p>')
+
+    def with_head(g):
+        return f'<h2 id="issue-fy{g[0]}">{esc(g[1])}</h2>' + "".join(g[2])
+
+    # 足す場所：導入の文のあと、最初の見出しか最初の号のリンクのうち早いほう
+    cand = [i for i in (body.find("<h2"), body.find('<p><a class="file"')) if i >= 0]
+    i = min(cand) if cand else len(body)
+    old_h = re.match(r"<h2[^>]*>(.*?)</h2>", body[i:], re.S)
+    last = groups[-1]
+    if old_h and re.sub(r"<[^>]+>", "", old_h.group(1)).strip() == last[1]:
+        # いちばん古い年度は、すでにある同じ見出しの下に続ける（見出しの二重を避ける）
+        head_end = i + old_h.end()
+        top = "".join(with_head(g) for g in groups[:-1])
+        body = body[:i] + top + body[i:head_end] + "".join(last[2]) + body[head_end:]
+        new_heads = [(f"issue-fy{g[0]}", g[1]) for g in groups[:-1]]
+    else:
+        body = body[:i] + "".join(with_head(g) for g in groups) + body[i:]
+        new_heads = [(f"issue-fy{g[0]}", g[1]) for g in groups]
+    return body, new_heads + heads
+
+
 def page_html(p):
     if p["slug"] == "inquiry":
         body, heads = with_form(p["body"], p["headings"])
+    elif p["slug"] == "page1_id7":
+        body, heads = issue_block(p["body"], p["headings"])
+        body = maps_in(body) + form_buttons(body)
     else:
         body, heads = maps_in(p["body"]) + form_buttons(p["body"]), p["headings"]
     toc = ""

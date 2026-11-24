@@ -91,6 +91,9 @@ def local(endpoint):
     return json.load(open(path, encoding="utf-8"))["contents"] if os.path.exists(path) else []
 
 
+ZEN2HAN = str.maketrans("０１２３４５６７８９", "0123456789")
+
+
 def jst_date(s):
     """microCMS の日時（UTC）を日本時間の日付 YYYY-MM-DD にする。"""
     t = datetime.datetime.fromisoformat(s.replace("Z", "+00:00"))
@@ -344,7 +347,12 @@ def normalize_news(rec, site, offline=False):
     page = f"topics_{old}.html" if old else f"news_{rec['id']}.html"
     link = localize_link(rec.get("link"), site, offline)
     body = clean_body(rec.get("body") or "", site, offline)
+    issue_no, issue_date = None, None   # 社協だよりの号数と発行日（両方入っているものだけ、過去号の一覧に自動で出す）
+    m = re.fullmatch(r"\s*([0-9]{1,4})\s*", str(rec.get("issueNo") or "").translate(ZEN2HAN))
+    if m and rec.get("issueDate"):
+        issue_no, issue_date = int(m.group(1)), jst_date(rec["issueDate"])
     return {
+        "issue_no": issue_no, "issue_date": issue_date,
         "id": rec["id"], "title": rec["title"].strip(), "category": cat, "iso": iso,
         "body": body, "page": page if body else None,
         "href": page if body else (site_link(link) or "#"), "link": site_link(link),
