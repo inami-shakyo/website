@@ -4,6 +4,8 @@
   if (/\/kanri\/(download|output)\.php$/.test(p) && m) to = "/files/" + decodeURIComponent(m[1]);
   else if (/\/kanri\/image\.php$/.test(p) && m) to = "/img/old/" + decodeURIComponent(m[1]);
   else if (/\/topics_index\.php$/.test(p)) to = "/topics_index.html";
+    else if (/\/news_index\.php$/.test(p)) to = "/topics_index.html";
+      else if (/\/(index|sitemap)\.php$/.test(p)) to = "/";
   else if (/\/inquiry\.php$/.test(p)) to = "/inquiry.html";
   if (to) { location.replace(to); return; }
   // 社協だよりなどの二次元コードから、掲載を終えたお知らせ（topics_○○.html）に来た人への案内
